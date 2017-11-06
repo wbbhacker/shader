@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title></title>
-	<style>
-		*{margin:0;padding:0;}
-		html,body{overflow: hidden;}
-	</style>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{margin:0;padding:0;}
+        html,body{overflow: hidden;}
+    </style>
 </head>
 <body>
     <div id="container"></div>
@@ -17,7 +17,7 @@
         }
     </script>
     <script id="fragmentShader" type="x-shader/x-fragment">
-           #ifdef GL_ES
+            #ifdef GL_ES
             precision mediump float;
             #endif
 
@@ -27,43 +27,30 @@
             uniform vec2 u_mouse;
             uniform float u_time;
 
-            float plot(vec2 st, float pct){
-              return  smoothstep( pct-0.02, pct, st.y) - 
-                      smoothstep( pct, pct+0.02, st.y);
+            vec3 colorA = vec3(0.149,0.141,0.912);
+            vec3 colorB = vec3(1.000,0.833,0.224);
+
+            float plot (vec2 st, float pct){
+              return  smoothstep( pct-0.01, pct, st.y) - 
+                      smoothstep( pct, pct+0.01, st.y);
             }
 
-
             void main() {
+                vec2 st = gl_FragCoord.xy/u_resolution.xy;
+                vec3 color = vec3(0.0);
 
-                vec2 st = gl_FragCoord.xy/u_resolution;
-
-                // float y = st.x;
-                // float y = pow(st.x,5.0);
-                // float y = step(0.5,st.x);
-                // float y = smoothstep(0.2,0.5,st.x) - smoothstep(0.5,0.8,st.x);
+                vec3 pct = vec3(st.x);
                 
-                // float y = sin(st.x+u_time*0.01);
-                // float y = sin(st.x*PI+u_time*0.01);
-                // float y = sin(st.x*PI+u_time*0.01)+0.1;
-                // float y = sin(st.x*PI+u_time*0.01)*2.0;
-                // float y = abs(sin(st.x*PI+u_time*0.01));
-                // float y = fract(sin(st.x*PI+u_time*0.01)); // 仅仅返回数的小数部分
-                // float y = ceil(sin(st.x*PI+u_time*0.01)); // 向正无穷取整
-                // float y = floor(sin(st.x*PI+u_time*0.01)); // 向负无穷取整
-                // float y = mod(st.x*PI+u_time*0.01,0.5); // 返回 x 对 0.5 取模的值
+                // pct.r = smoothstep(0.0,1.0, st.x);
+                // pct.g = sin(st.x*PI);
+                // pct.b = pow(st.x,0.5);
 
-                // float y = sign(st.x); // 提取 x 的正负号
-                // float y = clamp(st.x,0.0,1.0); // 提取 x 的正负号
-                // float y = min(0.0,st.x);   // 返回 x 和 0.0 中的较小值
-                float y = max(0.0,st.x);   // 返回 x 和 0.0 中的较小值
+                color = mix(colorA, colorB, pct);
 
-
-
-                vec3 color = vec3(y);
-                
-                float pct = plot(st,y);
-
-                color = (1.0-pct)*color + pct*vec3(0.0,1.0,0.0);
+                // Plot transition lines for each channel
+                color = mix(color,vec3(1.0,0.0,0.0),plot(st,pct.r));
+                color = mix(color,vec3(0.0,1.0,0.0),plot(st,pct.g));
+                color = mix(color,vec3(0.0,0.0,1.0),plot(st,pct.b));
 
                 gl_FragColor = vec4(color,1.0);
             }
@@ -75,8 +62,8 @@
         var uniforms;
 
         window.onload = function(){
-        		init();	
-        		animate();
+                init(); 
+                animate();
         }
         
 
@@ -117,8 +104,8 @@
 
         function onWindowResize( event ) {
 
-        	console.log(window.innerWidth)
-        	console.log(window.innerHeight)
+            console.log(window.innerWidth)
+            console.log(window.innerHeight)
 
             renderer.setSize( window.innerWidth, window.innerHeight );
             uniforms.u_resolution.value.x = renderer.domElement.width;
